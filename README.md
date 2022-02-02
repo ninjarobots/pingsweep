@@ -2,7 +2,7 @@
 A fast network sweep.
 
 
-# How to use
+### How to use ###
 
 * ./pingsweep \<Class C IP\>
  
