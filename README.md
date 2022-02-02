@@ -3,6 +3,7 @@ A fast network sweep.
 
 
 * How to use
+
 ./pingsweep <Class C IP>
  example:
    ./pingsweep 192.168.1
