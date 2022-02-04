@@ -1,39 +1,33 @@
 #!/usr/bin/env bash
 
 netcat(){
-  echo ""
   for sub_address in {1..254}; do
-    nc -vw 1 $1.$sub_address $2 2>&1 | grep -A 1 'succeeded!' &
-    sleep .008
+    nc -vzw 1 $1.$sub_address $2 | grep -B 1 'succeeded!' &
+    killall nc 2>/dev/null
   done
-  echo ""
 }
 
 netcat_range(){
-  echo ""
   for (( c=$1; c<=$2; c++ )); do
-    nc -vw 1 $3.$c $4 2>&1 | grep -A 1 'succeeded!' &
-    sleep .008
+    nc -vzw 1 $3.$c $4 | grep -B 1 'succeeded!' &
+    killall nc 2>/dev/null
   done
-  echo ""
 }
 
 
 # Ping sweep Module
 pingsweep(){
-  echo ""
   for sub_address in {1..254}; do
     ping -c 1 $1.$sub_address | grep -B 1 "1 received" | grep -E -o '([0-9]{1,3}[\.]){3}([0-9]{1,3})' &
+    killall ping 2>/dev/null
   done
-  echo ""
 }
 
 pingsweep_range(){
-  echo ""
   for (( c=$1; c<=$2; c++ )); do
     ping -c 1 $3.$c | grep -B 1 "1 received" | grep -E -o '([0-9]{1,3}[\.]){3}([0-9]{1,3})' &
+    killall ping 2>/dev/null
   done
-  echo ""
 }
 
 # Determine IP Class and only accept Class C address.
@@ -84,12 +78,10 @@ case $args in
       base=$(grep -E -o '[0-9]{1,5}[\-]' <<< $1 | sed 's/\-//g')
       top=$(grep -E -o '[\-][0-9]{1,5}' <<< $1 | sed 's/\-//g')
       pingsweep_range $base $top $subnet
-      killall ping 2>/dev/null
       exit
     else
       class $1
       pingsweep $address
-      killall ping 2>/dev/null
       exit
     fi
     ;;
@@ -100,14 +92,11 @@ case $args in
       top=$(grep -E -o '[\-][0-9]{1,5}' <<< $1 | sed 's/\-//g')
       ports=$(sed "s/$1//g" <<< $@)
       netcat_range $base $top $subnet "$ports"
-      killall nc 2>/dev/null
       exit
     else
       class $1
       ports=$(sed "s/$address //g" <<< $@)
       netcat $address "$ports"
-      #sleep 1
-      killall nc 2>/dev/null
       exit
     fi
     ;;
